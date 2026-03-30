@@ -19,7 +19,7 @@ async function generateLink(data)
    try {
       const expiresAt = getExpiration(data.expiresIn)
       const id = nanoid(8);
-      const dataSent = await pool.query("INSERT INTO links(id, content, expiresAt) VALUES(?, ?, ?)", [id, data.content, expiresAt])
+      await pool.query('INSERT INTO links(id, content, "expiresAt") VALUES($1, $2, $3)', [id, data.content, expiresAt])
       return { id };
    } catch (error) {
       console.log('CONTROLLER ERROR:', error)
@@ -30,8 +30,22 @@ async function generateLink(data)
 async function getData(id)
 {
    try {
-      const [rows] = await pool.query("SELECT * FROM links WHERE id = ?", [id]);
-      return rows[0];
+      const result = await pool.query(
+         "SELECT * FROM links WHERE id = $1",
+         [id]
+      );
+
+      const paste = result.rows[0];
+
+      if (!paste) return null;
+
+      if (paste.expiresAt && Date.now() > new Date(paste.expiresAt)) {
+         await deleteLink(id);
+         return null;
+      }
+
+      return paste;
+
    } catch (error) {
       console.log('CONTROLLER ERROR:', error);
       throw error;
@@ -41,7 +55,7 @@ async function getData(id)
 async function deleteLink(id)
 {
    try {
-      await pool.query("DELETE FROM links WHERE id = ?", [id]);
+      await pool.query("DELETE FROM links WHERE id = $1", [id]);
    } catch (error) {
       console.log("CONTROLLER ERROR: ", error)
       throw error;

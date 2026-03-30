@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
    
    } catch (error) {
       console.log("API ERROR:", error);
-      res.status(500).json({error: "Server error"});
+      res.status(500).json({error: "Server error", error});
    }
 })
 
