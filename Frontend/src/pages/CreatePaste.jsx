@@ -12,7 +12,7 @@ export function CreatePaste() {
    async function generateLink(body)
    {
       const data = await sendData(body);
-      setLink(`https://quick-paste-1ts4uysc9-mkhalfadels-projects.vercel.app/view/${data.id}`);
+      setLink(`https://quick-paste-bice.vercel.app/view/${data.id}`);
    }
    
    return (
